@@ -34,18 +34,27 @@ header h1 {
     display:flex; 
     height:calc(100vh - 56px);
     padding: 12px;
-
 }
-
 
 .sidebar {
     width:280px; border-right:1px solid #e6e6ef; 
     padding:12px; 
     background:linear-gradient(180deg,#fff,#fbfbff);
+    overflow: hidden;
+}
+
+#subjectsList {
+    height: 100%;
+    overflow: auto;
+}
+
+#subjectsList::-webkit-scrollbar {
+    display: none; 
 }
 
 .content {
-    flex:1; display:flex; 
+    flex:1; 
+    display:flex; 
     flex-direction:column; 
     gap:12px; 
     padding-left:12px
@@ -141,13 +150,6 @@ button.ghost{
     min-width:280px
 }
 
-.svg-wrap {
-    flex:1; 
-    overflow:auto; 
-    background:linear-gradient(180deg,#fff,#fcfcff); 
-    padding:12px; 
-    border-radius:10px
-}
 
 .task-row {
     display:flex; 
@@ -202,7 +204,12 @@ label {
 }
 
 .legend {
-    display:flex; gap:8px; align-items:center; margin-bottom:8px
+    position: absolute;
+    top: 8px;    
+    right: 12px; 
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
 .legend .box {
@@ -271,17 +278,32 @@ label {
     overflow: auto;
 }
 
+#tasksList::-webkit-scrollbar {
+    display: none; 
+}
+
 .svg-wrap {
-    flex: 1;
     display: flex;
     flex-direction: column;
+    position: relative;
+    width: 66vw;
     height: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    background: linear-gradient(180deg,#fff,#fcfcff);
+}
+
+.svg-container {
+    flex: 1;
+    overflow: auto;
 }
 
 #ganttSvg {
-    flex: 1;
-    width: 100%;
-    height: 100%;
+    display: block;
+    width: auto;   
+    height: auto;
+    min-width: 100%;   
+    min-height: 94%;  
 }
 
 .gantt-month {
@@ -298,3 +320,21 @@ label {
     fill: url(#noStartGrad);
 }
 
+.modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  width: 420px;
+  max-width: 90%;
+}

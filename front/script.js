@@ -104,6 +104,16 @@ const clearResponsibles = document.getElementById('clearResponsibles');
 const modalRoot = document.getElementById('modalRoot');
 const deleteProjectBtn = document.getElementById('deleteProjectBtn');
 
+document.getElementById("closeTaskInfoBtn").onclick = () => {
+    document.getElementById("taskInfoModal").classList.add("hidden");
+};
+
+document.getElementById("taskInfoModal").onclick = (e) => {
+    if (e.target.id === "taskInfoModal") {
+        e.target.classList.add("hidden");
+    }
+};
+
 let currentSubjectId = null;
 let currentProjectId = null;
 
@@ -487,6 +497,15 @@ function renderTasks(proj){
     };
     right.appendChild(done);
 
+    const addStage = document.createElement('button');
+    addStage.className = 'ghost';
+    addStage.textContent = '+ этап';
+    addStage.onclick = (e) => {
+        e.stopPropagation();
+        openStageEditor(t);  
+    };
+    right.appendChild(addStage);
+
     const edit = document.createElement('button'); 
     edit.className='ghost'; 
     edit.textContent='edit';
@@ -504,6 +523,7 @@ function renderTasks(proj){
         if(confirm('Удалить задачу?')) { 
             proj.tasks = proj.tasks.filter(x=>x.id!==t.id); 
             renderTasks(proj); 
+            renderGantt(proj);
         } 
     };
     right.appendChild(del);
@@ -780,6 +800,45 @@ function createModal(title=''){
   return { root:overlay, content };
 }
 
+
+function openTaskInfoModal(proj, taskId) {
+    const task = proj.tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    const modal = document.getElementById("taskInfoModal");
+    const title = document.getElementById("taskInfoTitle");
+    const body = document.getElementById("taskInfoBody");
+
+    title.textContent = task.title;
+
+    let html = `
+        <div class="muted small">Дедлайн: ${task.deadline}</div>
+        <div class="muted small">Начало: ${task.start || "—"}</div>
+        <div class="muted small">Длительность: ${task.duration || "?"} д.</div>
+        <div class="muted small">Ответственный: ${task.responsible || "—"}</div>
+        <hr style="margin: 10px 0;">
+        <strong>Этапы:</strong>
+    `;
+
+    if (task.stages && task.stages.length) {
+        html += `<ul style="margin-top:6px; padding-left:18px">`;
+        task.stages.forEach(st => {
+            html += `
+                <li>
+                    <strong>${st.title}</strong> — ${st.duration} д.
+                    ${st.done ? '<span style="color:var(--ok)"> (готово)</span>' : ''}
+                </li>`;
+        });
+        html += `</ul>`;
+    } else {
+        html += `<div class="muted small">Этапов нет.</div>`;
+    }
+
+    body.innerHTML = html;
+
+    modal.classList.remove("hidden");
+}
+
 function renderGantt(project){
     const svg = document.getElementById("ganttSvg");
     svg.innerHTML = "";
@@ -806,8 +865,8 @@ function renderGantt(project){
     const dayMs = 86400000;
     const totalDays = Math.ceil((maxDate-minDate)/dayMs);
     const pxPerDay = 16, leftMargin=140, rowHeight=34;
-    svg.setAttribute("width", leftMargin + totalDays*pxPerDay + 100);
-    svg.setAttribute("height", tasks.length*rowHeight + 120);
+    svg.style.width  = (leftMargin + totalDays * pxPerDay + 100) + "px";
+    svg.style.height = (tasks.length * rowHeight + 120) + "px";
 
     const defs = document.createElementNS("http://www.w3.org/2000/svg","defs");
     defs.innerHTML = `
@@ -834,7 +893,6 @@ function renderGantt(project){
         cur = new Date(cur.getFullYear(), cur.getMonth()+1, 1);
     }
 
-    // задачи
     tasks.forEach((t,i)=>{
         const dl = parseDate(t.deadline);
         const st = t.start ? parseDate(t.start) : null;
@@ -859,6 +917,10 @@ function renderGantt(project){
 
         const barColor = t.done ? "#2aa36b" : (st ? "#6b46c1" : "url(#noStartGrad)");
         bar.setAttribute("fill", barColor);
+
+        bar.onclick = () => {
+          openTaskInfoModal(project, t.id);
+        };
 
         svg.appendChild(bar);
     });
@@ -903,8 +965,6 @@ function renderGantt(project){
         });
     });
 }
-
-
 
 
 function closeModal(node){ if(node && node.parentNode) node.parentNode.removeChild(node); }
