@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Реверсивная диаграмма Ганта</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="4" fill="#6b46c1"/><path d="M7 12h10M7 8h10M7 16h6" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/></svg>
+  <h1>Реверсивная диаграмма Ганта</h1>
+</header>
+
+<div class="app">
+  <aside class="sidebar card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <strong>Subjects</strong>
+      <button id="addSubjectBtn" title="Добавить предмет">+</button>
+    </div>
+    <div id="subjectsList" class="list"></div>
+    <hr style="margin:12px 0;border:none;border-top:1px solid #f0f0f6">
+  </aside>
+
+  <main class="content">
+    <div class="card choose" style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div id="currentSubjectTitle"><strong>Выберите предмет</strong></div>
+      </div>
+      <div class="top-actions">
+        <button id="backToSubjects" class="ghost" style="display:none">← Назад</button>
+      </div>
+    </div>
+
+    <div id="projectsArea" class="card" style="display:none; padding:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+            <strong>Projects</strong>
+            <div class="muted small">Проекты предмета</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+            <button id="deleteProjectBtn" class="ghost" style="display:none;">Удалить проект</button>
+            <button id="addProjectBtn">+ Проект</button>
+        </div>
+        </div>
+      <div id="projectsTabs" class="projects-tabs" style="margin-top:8px"></div>
+    </div>
+
+    <div id="projectDetail" style="display:none; flex:1; min-height:300px;">
+      <div style="display:flex;gap:12px; align-items:flex-start">
+        <div class="left-panel card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong id="projectTitle">Проект</strong>
+            <div class="muted small" id="projectDeadlineLabel"></div>
+          </div>
+
+          <div style="margin-top:8px">
+            <div style="display:flex;gap:8px; margin-bottom:8px">
+              <button id="addTaskBtn">+ Задача</button>
+              <button id="addStageBtn" class="ghost">+ Этап</button>
+            </div>
+
+            <div id="tasksList" style="margin-top:8px; max-height:435px; overflow:auto"></div>
+          </div>
+
+          <hr style="margin:10px 0;border:none;border-top:1px solid #f0f0f6">
+          <div class="muted small">Ответственные</div>
+          <div id="responsiblesList" class="list" style="margin-top:8px"></div>
+          <div style="margin-top:8px">
+            <form id="addResponsibleForm">
+              <input id="responsibleInput" placeholder="Имя студента или группы" />
+              <div style="display:flex; gap:8px; margin-top:8px">
+                <button type="submit">Добавить</button>
+                <button id="clearResponsibles" type="button" class="ghost">Очистить</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="svg-wrap card" style="flex:1;">
+          <div style="display:flex;justify-content:space-between;align-items:center; margin-bottom:8px">
+            <div>
+              <strong>Реверсивная диаграмма Ганта</strong>
+            </div>
+            <div class="legend">
+              <div class="box" style="background:var(--accent)"></div><div class="small muted">задача</div>
+              <div class="box" style="background:var(--ok)"></div><div class="small muted">выполнено</div>
+              <div class="box" style="background:#a78bfa"></div><div class="small muted">этап</div>
+            </div>
+          </div>
+
+          <svg id="ganttSvg" width="100%" height="420" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="modalRoot"></div>
+
+<script src="script.js"></script>
+</body>
+</html>

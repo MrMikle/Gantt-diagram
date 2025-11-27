@@ -1,0 +1,300 @@
+:root{
+    --bg:#f7f7fb; --card:#fff; --accent:#6b46c1; --muted:#6b6b80;
+    --ok:#2aa36b; --danger:#e55353;
+}
+
+* { 
+    box-sizing:border-box;
+    margin: 0;
+}
+
+body {
+    font-family: 'Inter', system-ui, Arial; 
+    margin:0; 
+    background:var(--bg); 
+    color:#222;
+    height: 100vh;
+}
+
+header{
+    background:#111; 
+    color:#fff; 
+    padding: 14px 20px; 
+    display:flex; 
+    align-items:center; 
+    gap:12px
+}
+
+header h1 {
+    font-size:16px; 
+    margin:0
+}
+
+.app {
+    display:flex; 
+    height:calc(100vh - 56px);
+    padding: 12px;
+
+}
+
+
+.sidebar {
+    width:280px; border-right:1px solid #e6e6ef; 
+    padding:12px; 
+    background:linear-gradient(180deg,#fff,#fbfbff);
+}
+
+.content {
+    flex:1; display:flex; 
+    flex-direction:column; 
+    gap:12px; 
+    padding-left:12px
+}
+
+.card {
+    background:var(--card); 
+    border-radius:10px; 
+    padding:12px; 
+    box-shadow:0 6px 18px rgba(15,15,30,0.06)
+}
+
+.choose {
+    height: 57px;
+}
+
+.list {
+    display:flex; 
+    flex-direction:column; 
+    gap:8px; 
+    margin-top:8px
+}
+
+.item {
+    padding:10px; 
+    border-radius:8px; 
+    border:1px solid #eee; 
+    display:flex; 
+    justify-content:space-between; 
+    align-items:center; 
+    gap:8px
+}
+
+button {
+    background:var(--accent); 
+    color:#fff; 
+    border:0; 
+    padding:8px 10px; 
+    border-radius:8px; 
+    cursor:pointer
+}
+
+button.ghost{ 
+    background:transparent; 
+    color:var(--accent); 
+    border:1px solid #e7e3f6
+}
+
+.muted {
+    color:var(--muted); 
+    font-size:13px
+}
+
+
+.top-actions {
+    display:flex; 
+    gap:8px; 
+    align-items:center
+}
+
+.projects-tabs {
+    display:flex; 
+    gap:8px; 
+    flex-wrap:wrap
+}
+
+.tab {
+    
+    padding:8px 10px; 
+    
+    border-radius:8px; 
+    
+    border:1px solid #eee; 
+    
+    cursor:pointer
+
+}
+
+.tab.active {
+    background:linear-gradient(90deg,#f3e9ff,#f7f3ff); 
+    border-color: rgba(107,70,193,0.18)
+}
+
+.gantt-wrap {
+    display:flex; 
+    gap:12px; 
+    align-items:flex-start; 
+    overflow:hidden
+}
+
+.left-panel { 
+    width:360px; 
+    min-width:280px
+}
+
+.svg-wrap {
+    flex:1; 
+    overflow:auto; 
+    background:linear-gradient(180deg,#fff,#fcfcff); 
+    padding:12px; 
+    border-radius:10px
+}
+
+.task-row {
+    display:flex; 
+    gap:8px; 
+    align-items:center; 
+    padding:6px; 
+    border-bottom:1px dashed #f1f1f8
+}
+
+.small {
+    font-size:13px}
+
+.stage {
+    font-size:13px; 
+    padding:6px 8px; 
+    border-radius:6px; 
+    background:#fafafa; 
+    border:1px solid #f0f0f4
+}
+
+.task-done {
+    opacity:0.5; text-decoration:line-through
+}
+
+
+input[type="text"], input[type="date"], input[type="number"], select, textarea {
+    width:100%; 
+    padding:8px; 
+    border-radius:8px; 
+    border:1px solid #e6e6ef; 
+    background:transparent;
+}
+
+form {
+    display:flex; flex-direction:column; gap:8px
+}
+
+label {
+    font-size:13px; color:var(--muted)
+}
+
+.row {
+    display:flex; gap:8px
+}
+
+.row > * {
+    flex:1
+}
+
+.hint {
+    font-size:12px; color:#8a88a3
+}
+
+.legend {
+    display:flex; gap:8px; align-items:center; margin-bottom:8px
+}
+
+.legend .box {
+    width:14px; height:14px; border-radius:4px
+}
+
+.bar {
+    fill:#6b46c1; opacity:0.95
+}
+
+.bar.done {
+    fill:var(--ok)
+}
+
+.bar.stage {
+    fill:#a78bfa; opacity:0.6
+}
+
+.axis text {
+    font-size:12px; fill:#666
+}
+
+#tooltip {
+    display: none;
+    position: absolute;
+    background: #a37cf0;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    pointer-events: none;
+    z-index: 9999;
+    max-width: 300px;
+    white-space: normal;
+    animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-3px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#projectDetail {
+    box-shadow: 0 6px 18px rgba(15, 15, 30, 0.06);
+}
+
+#projectDetail > div {
+    display: flex;
+    gap: 12px;
+    align-items: stretch; 
+    height: 100%; 
+    overflow: hidden;
+}
+
+.left-panel {
+    width: 360px;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#tasksList {
+    flex: 1;
+    overflow: auto;
+}
+
+.svg-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#ganttSvg {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.gantt-month {
+    font-size: 12px;
+    fill: #666;
+}
+
+.gantt-connector {
+    stroke-width: 2px;
+    fill: none;
+}
+
+.bar.no-start {
+    fill: url(#noStartGrad);
+}
+
