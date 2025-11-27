@@ -421,7 +421,6 @@ function openProject(subjId, projId) {
 
 
 addTaskBtn.onclick = ()=>openTaskEditor();
-addStageBtn.onclick = ()=>openStageEditor();
 
 function renderTasks(proj){
   tasksList.innerHTML = '';
@@ -965,6 +964,66 @@ function renderGantt(project){
         });
     });
 }
+
+
+// Получаем элементы
+const authModal = document.getElementById('authModal');
+const closeAuthBtn = document.getElementById('closeAuth');
+const loginTab = document.getElementById('loginTab');
+const registerTab = document.getElementById('registerTab');
+const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
+const openAuthBtn = document.getElementById('openAuth');
+
+// Функция открытия модалки
+function openAuthModal() {
+    authModal.classList.remove('hidden');
+}
+
+// Функция закрытия модалки
+function closeAuthModal() {
+    authModal.classList.add('hidden');
+}
+
+openAuthBtn.addEventListener('click', () => {
+  authModal.classList.remove('hidden');
+});
+
+closeAuthBtn.addEventListener('click', () => {
+  authModal.classList.add('hidden');
+});
+
+// Переключение табов
+function showLogin() {
+    loginTab.classList.add('active');
+    registerTab.classList.remove('active');
+    loginForm.classList.remove('hidden');
+    registerForm.classList.add('hidden');
+}
+
+function showRegister() {
+    registerTab.classList.add('active');
+    loginTab.classList.remove('active');
+    registerForm.classList.remove('hidden');
+    loginForm.classList.add('hidden');
+}
+
+// Слушатели
+closeAuthBtn.addEventListener('click', closeAuthModal);
+loginTab.addEventListener('click', showLogin);
+registerTab.addEventListener('click', showRegister);
+
+// Пример глобальной кнопки открытия модалки
+// <button id="openAuthBtn">Авторизация</button>
+if (openAuthBtn) {
+    openAuthBtn.addEventListener('click', openAuthModal);
+}
+
+// Закрытие по клику на фон
+authModal.addEventListener('click', (e) => {
+    if (e.target === authModal) closeAuthModal();
+});
+
 
 
 function closeModal(node){ if(node && node.parentNode) node.parentNode.removeChild(node); }
