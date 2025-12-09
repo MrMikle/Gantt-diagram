@@ -23,4 +23,15 @@ public class StudentsController : ControllerBase
 
         return Ok(student.Projects);
     }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetStudent(Guid id)
+    {
+        var student = await _db.Students
+            .FirstOrDefaultAsync(s => s.Id == id);
+
+        if (student == null) return NotFound();
+
+        return Ok(student);
+    }
 }

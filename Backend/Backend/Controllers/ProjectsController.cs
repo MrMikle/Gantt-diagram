@@ -34,22 +34,34 @@ public class ProjectsController : ControllerBase
         return Ok(existing);
     }
 
-    [HttpPost("{studentId}")]
-    public async Task<IActionResult> Create(int studentId, Project project)
+    [HttpPost]
+    public async Task<IActionResult> Create(
+        [FromBody] Project project,
+        [FromQuery] Guid? creatorId,
+        [FromQuery] int? subjectId)
     {
-        var student = await _db.Students
-            .Include(s => s.Projects)
-            .FirstOrDefaultAsync(s => s.Id == Guid.Parse(studentId.ToString()));
+        if (subjectId != null)
+            project.SubjectId = subjectId.Value;
 
-        if (student == null) return NotFound("Студент не найден");
+        if (project.Team == null)
+            project.Team = new List<Student>();
+
+        if (creatorId != null)
+        {
+            var student = await _db.Students.FirstOrDefaultAsync(s => s.Id == creatorId.Value);
+            if (student != null)
+                project.Team.Add(student);
+        }
 
         _db.Projects.Add(project);
+
         await _db.SaveChangesAsync();
 
-        student.Projects.Add(project);
-        await _db.SaveChangesAsync();
+        var projWithTeam = await _db.Projects
+            .Include(p => p.Team)
+            .FirstOrDefaultAsync(p => p.Id == project.Id);
 
-        return CreatedAtAction(nameof(Get), new { id = project.Id }, project);
+        return CreatedAtAction(nameof(Get), new { id = project.Id }, projWithTeam);
     }
 
     [HttpGet("{projectId}/tasks")]
@@ -72,5 +84,47 @@ public class ProjectsController : ControllerBase
         _db.Projects.Remove(p);
         await _db.SaveChangesAsync();
         return NoContent();
+    }
+
+    [HttpPost("{projectId}/addStudent")]
+    public async Task<IActionResult> AddStudent(int projectId, [FromBody] AddStudentRequest request)
+    {
+        var project = await _db.Projects
+            .Include(p => p.Team)
+            .FirstOrDefaultAsync(p => p.Id == projectId);
+
+        if (project == null)
+            return NotFound(new { error = "Проект не найден" });
+
+        var student = await _db.Students.FirstOrDefaultAsync(s => s.Id == request.StudentId);
+        if (student == null)
+            return NotFound(new { error = "Студент не найден" });
+
+        if (project.Team == null)
+            project.Team = new List<Student>();
+
+        if (project.Team.Any(s => s.Id == student.Id))
+            return BadRequest(new { error = "Студент уже в команде" });
+
+        project.Team.Add(student);
+        await _db.SaveChangesAsync();
+
+        return Ok(student);
+    }
+
+    public class AddStudentRequest
+    {
+        public Guid StudentId { get; set; }
+    }
+
+    [HttpGet("{id}/team")]
+    public async Task<IActionResult> GetTeam(int id)
+    {
+        var project = await _db.Projects
+            .Include(p => p.Team)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (project == null) return NotFound();
+        return Ok(project.Team.Select(s => new { s.Id, s.Login }));
     }
 }

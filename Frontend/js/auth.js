@@ -248,8 +248,8 @@ async function openProfilePage() {
     const profilePage = document.getElementById('profilePage');
     if (!profilePage || !currentUser) return;
 
-    clearAppState();        // очищаем старые данные
-    await loadUserData();   // подгружаем проекты только для текущего юзера
+    clearAppState();
+    await loadUserData();  
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -261,26 +261,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     init();
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 console.log("api.js loaded");
 
@@ -304,21 +284,13 @@ async function fetchSubjects() {
 }
 
 function filterSubjectsByStudent(subjects, studentId) {
-    if (currentUser == null) return;
-    if (!studentId) return subjects.map(s => ({ ...s, projects: [] }));
-
+    if (currentUser == null) return [];
     return subjects.map(s => {
-        const filteredProjects = (s.projects || []).filter(p => {
-            if (!p.team || !p.team.length) return false;
-            return p.team.some(member => String(member.id) === String(studentId));
-        }).map(p => {
-            p.tasks = p.tasks || [];
-            p.responsibles = p.responsibles || [];
-            return p;
-        });
-
+        const filteredProjects = (s.projects || []).filter(p =>
+            p.team?.some(member => String(member.id) === String(studentId))
+        );
         return { ...s, projects: filteredProjects };
-    }).filter(s => (s.projects || []).length > 0 || true);
+    });
 }
 
 async function fetchProjects(subjectId) {
@@ -386,10 +358,19 @@ async function createProject() {
     };
 
     try {
-        const newProj = await addProjectAPI(currentSubjectId, proj);
+        const studentId = await getStudentId();
+
+        const newProj = await addProjectAPI(currentSubjectId, proj, studentId);
         const subj = state.subjects.find(x => x.id === currentSubjectId);
         subj.projects = subj.projects || [];
-        subj.projects.push({ ...newProj, tasks: [], responsibles: [] });
+
+        subj.projects.push({
+            ...newProj,
+            tasks: [],
+            responsibles: [],
+            team: newProj.team
+        });
+
         renderSubjects();
         renderProjects(subj);
         openProject(subj.id, newProj.id);
@@ -409,26 +390,31 @@ async function addSubjectAPI(name) {
     return await res.json();
 }
 
-async function addResponsibleAPI(projectId, name) {
-    if (currentUser == null) return;
-    const res = await fetch(`${API_BASE}/responsibles/${projectId}`, {
+async function addResponsibleAPI(projectId, studentId) {
+    if (!currentUser) return;
+
+    const res = await fetch(`${API_BASE}/projects/${projectId}/addStudent`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name })
+        body: JSON.stringify({ studentId })
     });
-    if (!res.ok) throw new Error(await res.text());
+
+    if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || "Ошибка добавления студента в проект");
+    }
+
     return await res.json();
 }
 
-async function addProjectAPI(subjectId, project) {
+async function addProjectAPI(subjectId, project, studentId) {
     if (currentUser == null) return;
-    const res = await fetch(`${API_BASE}/projects`, {
+    const res = await fetch(`${API_BASE}/projects?creatorId=${studentId}&subjectId=${subjectId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             name: project.name,
-            deadline: project.deadline,
-            subjectId
+            deadline: project.deadline
         })
     });
     if (!res.ok) throw new Error("Ошибка добавления проекта");
@@ -490,8 +476,23 @@ async function loadProjectsToState(subjectId) {
 
     const subj = state.subjects.find(s => s.id === subjectId);
     subj.projects = projects;
-}
 
+    // подгружаем студентов для каждого проекта
+    for (const proj of subj.projects) {
+        if (!proj.team) proj.team = [];
+        if (!proj.responsibles) proj.responsibles = [];
+        try {
+            const res = await fetch(`${API_BASE}/projects/${proj.id}/team`, { credentials: 'include' });
+            if (res.ok) {
+                const team = await res.json(); // [{id, login}]
+                proj.team = team;
+                proj.responsibles = team.map(s => ({ id: s.id, name: s.login }));
+            }
+        } catch (err) {
+            console.error('Ошибка загрузки команды проекта', err);
+        }
+    }
+}
 async function updateProjectAPI(projectId, data) {
     if (currentUser == null) return;
     const res = await fetch(`${API_BASE}/projects/${projectId}`, {
@@ -550,23 +551,6 @@ async function deleteTaskAPI(taskId) {
         throw new Error("Ошибка удаления задачи: " + text);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 console.log("2.js loaded");
 function renderSubjects() {
@@ -1036,27 +1020,6 @@ function renderResponsibles(proj) {
     });
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 console.log("3.js loaded");
 
 function openStageEditor(task = null, stage = null) {
@@ -1271,6 +1234,31 @@ function openTaskInfoModal(proj, taskId) {
     modal.classList.remove("hidden");
 }
 
+function renderTeam(proj) {
+    const container = document.getElementById('responsiblesList');
+    container.innerHTML = '';
+    if (!proj.team || proj.team.length === 0) {
+        container.textContent = 'Нет студентов';
+        return;
+    }
+
+    proj.team.forEach(st => {
+        const div = document.createElement('div');
+        div.textContent = st.login;
+        container.appendChild(div);
+    });
+}
+
+async function loadProjectTeam(projectId) {
+    const res = await fetch(`${API_BASE}/projects/${projectId}/team`, { credentials: 'include' });
+    if (res.ok) {
+        const team = await res.json();
+        const proj = getProjectById(projectId);
+        proj.team = team;
+        proj.responsibles = team.map(s => ({ id: s.id, name: s.login }));
+    }
+}
+
 function openTaskEditor(task = null) {
     if (currentUser == null) return;
     if (!currentSubjectId || !currentProjectId) return;
@@ -1370,7 +1358,7 @@ function openTaskEditor(task = null) {
     form.cancelBtn.onclick = () => closeModal(modal.root);
 }
 
-function openProject(subjId, projId) {
+async function openProject(subjId, projId) {
     if (currentUser == null) return;
     currentProjectId = projId;
     const subj = state.subjects.find(x => x.id === subjId);
@@ -1380,9 +1368,26 @@ function openProject(subjId, projId) {
     projectTitle.textContent = proj.name;
     projectDeadlineLabel.textContent = proj.deadline ? 'DL: ' + proj.deadline : '';
     renderProjects(subj);
-    loadTasks(proj);
+    loadTasks(proj); 
+
+    if (!proj.team || proj.team.length === 0) {
+        await loadProjectTeam(proj.id);
+
+        try {
+            const res = await fetch(`${API_BASE}/projects/${proj.id}/team`, { credentials: 'include' });
+            if (res.ok) {
+                const team = await res.json(); // [{id, login}]
+                proj.team = team;
+                proj.responsibles = team.map(s => ({ id: s.id, name: s.login }));
+            }
+        } catch (err) {
+            console.error('Ошибка подгрузки команды проекта', err);
+        }
+    }
+
     renderResponsibles(proj);
     renderGantt(proj);
+    renderTeam(proj);
     deleteProjectBtn.style.display = 'inline-block';
 }
 
@@ -1412,25 +1417,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     addResponsibleForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        e.stopPropagation();
-        console.log("Форма отправляется");
-        if (!currentSubjectId || !currentProjectId) return;
+        const studentId = responsibleInput.value.trim();
+        if (!studentId) return alert("Введите ID студента");
 
-        const v = responsibleInput.value.trim();
-        if (!v) return;
-
-        const subj = state.subjects.find(x => x.id === currentSubjectId);
-        const proj = subj.projects.find(x => x.id === currentProjectId);
+        const proj = getCurrentProject();
+        if (!proj) return alert("Сначала выберите проект");
 
         try {
-            const added = await addResponsibleAPI(currentProjectId, v);
-            console.log("Ответ от сервера:", added);
+            const addedStudent = await addResponsibleAPI(proj.id, studentId);
+
+            // обновляем фронтенд
             proj.responsibles = proj.responsibles || [];
-            proj.responsibles.push(added);
+            proj.team = proj.team || [];
+
+            if (!proj.responsibles.some(s => s.id === addedStudent.id)) {
+                proj.responsibles.push({ id: addedStudent.id, name: addedStudent.login });
+            }
+            if (!proj.team.some(s => s.id === addedStudent.id)) {
+                proj.team.push({ id: addedStudent.id, login: addedStudent.login });
+            }
+
             responsibleInput.value = '';
             renderResponsibles(proj);
+            renderTeam(proj); // чтобы сразу обновить отображение команды
+            alert(`Студент ${addedStudent.login} добавлен в проект`);
         } catch (err) {
-            alert("Не удалось добавить ответственного: " + err.message);
+            console.error(err);
+            alert("Ошибка добавления студента: " + err.message);
         }
     });
 });
@@ -1444,25 +1457,6 @@ document.getElementById("taskInfoModal").onclick = (e) => {
         e.target.classList.add("hidden");
     }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 console.log("4.js loaded");
 
@@ -1487,6 +1481,15 @@ const responsiblesList = document.getElementById('responsiblesList');
 const clearResponsibles = document.getElementById('clearResponsibles');
 const modalRoot = document.getElementById('modalRoot');
 const deleteProjectBtn = document.getElementById('deleteProjectBtn');
+const addResponsibleForm = document.getElementById('addResponsibleForm');
+const responsibleInput = document.getElementById('responsibleInput');
+
+function getCurrentProject() {
+    if (!currentSubjectId || !currentProjectId) return null;
+    const subj = state.subjects.find(s => s.id === currentSubjectId);
+    if (!subj) return null;
+    return subj.projects.find(p => p.id === currentProjectId) || null;
+}
 
 let currentSubjectId = null;
 let currentProjectId = null;
