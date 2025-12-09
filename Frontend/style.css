@@ -22,7 +22,8 @@ header{
     padding: 14px 20px; 
     display:flex; 
     align-items:center; 
-    gap:12px
+    gap:12px;
+    justify-content: space-between;
 }
 
 header h1 {
@@ -337,4 +338,111 @@ label {
 .modal-content {
   width: 420px;
   max-width: 90%;
+}
+
+
+.auth-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.auth-dialog {
+    position: relative;
+    background: linear-gradient(180deg,#ffffff,#faf8ff);
+    width: 360px;
+    padding: 40px 26px 26px 26px; 
+    border-radius: 18px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    animation: slideFade 0.25s ease-out;
+}
+
+@keyframes slideFade {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.auth-close {
+    position: absolute;
+    top: 12px; 
+    right: 12px;
+    cursor: pointer;
+    background: #eee;
+    border: none;
+    font-size: 18px;
+    color: #555;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: 0.2s;
+}
+
+.auth-close:hover {
+    background: #ddd;
+}
+
+.auth-tabs {
+    display: flex;
+    margin-top: 12px;
+    margin-bottom: 18px;
+    background:#f3eefc;
+    border-radius:10px;
+    padding:4px;
+}
+
+.auth-tab {
+    flex:1;
+    text-align:center;
+    padding:10px;
+    cursor:pointer;
+    border-radius:8px;
+    transition:0.2s;
+    font-weight:600;
+    color:#555;
+}
+
+.auth-tab.active {
+    background:white;
+    color:#6b46c1;
+    box-shadow:0 2px 6px rgba(0,0,0,0.06);
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.auth-form input {
+    border:1px solid #d9d5ea;
+    padding:10px;
+    border-radius:10px;
+    transition:0.2s;
+}
+
+.auth-form input:focus {
+    border-color:#6b46c1;
+    box-shadow:0 0 0 2px rgba(107,70,193,0.25);
+}
+
+.auth-form button {
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background: #6b46c1;
+    color: white;
+    cursor: pointer;
+}
+
+.auth-form.hidden {
+    display: none !important;
 }

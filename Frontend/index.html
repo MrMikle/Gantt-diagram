@@ -10,6 +10,7 @@
     <header>
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="4" fill="#6b46c1" /><path d="M7 12h10M7 8h10M7 16h6" stroke="#fff" stroke-width="1.2" stroke-linecap="round" /></svg>
         <h1>Реверсивная диаграмма Ганта</h1>
+        <button id="openAuth" class="auth-header-btn">Войти</button>
     </header>
 
     <div class="app">
@@ -107,9 +108,37 @@
         </div>
     </div>
 
+    <div id="authModal" class="modal hidden">
+    <div class="auth-dialog">
+        <button id="closeAuth" class="auth-close">✕</button>
+
+        <div class="auth-tabs">
+        <div id="loginTab" class="auth-tab active">Вход</div>
+        <div id="registerTab" class="auth-tab">Регистрация</div>
+        </div>
+
+        <form id="loginForm" class="auth-form">
+        <label>Логин</label>
+        <input type="text" id="loginUser" required>
+        <label>Пароль</label>
+        <input type="password" id="loginPass" required>
+        <button type="submit">Войти</button>
+        </form>
+
+        <form id="registerForm" class="auth-form hidden">
+        <label>Новый логин</label>
+        <input type="text" id="regUser" required>
+        <label>Пароль</label>
+        <input type="password" id="regPass" required>
+        <button type="submit">Создать аккаунт</button>
+        </form>
+    </div>
+    </div>
+
     <script src="js/renderer.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/auth.js"></script>
 </body>
 </html>

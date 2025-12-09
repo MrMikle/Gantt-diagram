@@ -1,0 +1,25 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build
+bin/
+obj/
+**/bin/
+**/obj/
+
+# ASP.NET generated
+appsettings.Development.json
+
+# Rider
+.idea/
+
+# Logs
+*.log
+
+# Temp
+*.tmp
+
+# Publish
+publish/
