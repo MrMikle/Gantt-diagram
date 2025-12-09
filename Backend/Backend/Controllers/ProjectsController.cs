@@ -16,7 +16,7 @@ public class ProjectsController : ControllerBase
     {
         var proj = await _db.Projects
             .Include(p => p.Tasks).ThenInclude(t => t.Stages)
-            .Include(p => p.Responsibles)
+            .Include(p => p.Team)
             .FirstOrDefaultAsync(p => p.Id == id);
         return proj == null ? NotFound() : Ok(proj);
     }
@@ -34,11 +34,21 @@ public class ProjectsController : ControllerBase
         return Ok(existing);
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Create(Project project)
+    [HttpPost("{studentId}")]
+    public async Task<IActionResult> Create(int studentId, Project project)
     {
+        var student = await _db.Students
+            .Include(s => s.Projects)
+            .FirstOrDefaultAsync(s => s.Id == Guid.Parse(studentId.ToString()));
+
+        if (student == null) return NotFound("Студент не найден");
+
         _db.Projects.Add(project);
         await _db.SaveChangesAsync();
+
+        student.Projects.Add(project);
+        await _db.SaveChangesAsync();
+
         return CreatedAtAction(nameof(Get), new { id = project.Id }, project);
     }
 

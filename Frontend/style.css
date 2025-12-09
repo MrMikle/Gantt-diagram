@@ -17,6 +17,7 @@ body {
 }
 
 header{
+    position: relative;
     background:#111; 
     color:#fff; 
     padding: 14px 20px; 
@@ -445,4 +446,36 @@ label {
 
 .auth-form.hidden {
     display: none !important;
+}
+
+
+.user-dropdown {
+    position: absolute;
+    top: 110%; 
+    right: 0;
+    transform: translateX(-10px); 
+    background: #000; 
+    color: #fff;       
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    overflow: hidden;
+    z-index: 1000;
+}
+
+.user-dropdown button {
+    width: 100%;
+    padding: 10px 16px;
+    background: transparent;
+    color: #fff;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+}
+
+.user-dropdown button:hover {
+    background-color: #222;
+}
+
+.user-dropdown.hidden {
+    display: none;
 }

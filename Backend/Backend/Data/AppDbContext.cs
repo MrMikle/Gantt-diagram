@@ -13,8 +13,9 @@ namespace Backend.Data
         public DbSet<Project> Projects => Set<Project>();
         public DbSet<TaskItem> Tasks => Set<TaskItem>();
         public DbSet<TaskStage> Stages => Set<TaskStage>();
-        public DbSet<Responsible> Responsibles => Set<Responsible>();
         public DbSet<TaskDependency> Dependencies => Set<TaskDependency>();
+        public DbSet<Student> Students => Set<Student>();
+        public DbSet<Session> Sessions => Set<Session>();
 
         protected override void OnModelCreating(ModelBuilder model)
         {
@@ -47,18 +48,33 @@ namespace Backend.Data
                 b.HasOne(x => x.Task).WithMany(t => t.Stages).HasForeignKey(x => x.TaskItemId).OnDelete(DeleteBehavior.Cascade);
             });
 
-            model.Entity<Responsible>(b =>
-            {
-                b.HasKey(x => x.Id);
-                b.HasOne(x => x.Project).WithMany(p => p.Responsibles).HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.Cascade);
-            });
-
             model.Entity<TaskDependency>(b =>
             {
                 b.HasKey(x => x.Id);
                 b.HasOne(d => d.Task).WithMany(t => t.Dependencies).HasForeignKey(d => d.TaskId).OnDelete(DeleteBehavior.Cascade);
                 b.HasOne(d => d.DependsOn).WithMany().HasForeignKey(d => d.DependsOnTaskId).OnDelete(DeleteBehavior.Restrict);
                 b.HasIndex(d => new { d.TaskId, d.DependsOnTaskId }).IsUnique(false);
+            });
+
+            model.Entity<Student>(b =>
+            {
+                b.HasKey(s => s.Id);
+                b.Property(s => s.Login).IsRequired();
+                b.Property(s => s.PasswordHash).IsRequired();
+                b.HasMany(s => s.Projects)
+                 .WithMany(p => p.Team)
+                 .UsingEntity(j => j.ToTable("ProjectStudent")); 
+            });
+
+            model.Entity<Session>(b =>
+            {
+                b.HasKey(s => s.Id);
+                b.HasOne(s => s.Student)
+                    .WithMany() 
+                    .HasForeignKey(s => s.StudentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.Property(s => s.Token).IsRequired();
+                b.Property(s => s.ExpiresAt).IsRequired();
             });
         }
     }

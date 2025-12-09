@@ -17,9 +17,9 @@ namespace Backend.Controllers
         {
             var subjects = await _db.Subjects
                 .Include(s => s.Projects)
-                    .ThenInclude(p => p.Tasks) // <-- добавляем задачи
+                    .ThenInclude(p => p.Tasks)
                 .Include(s => s.Projects)
-                    .ThenInclude(p => p.Responsibles) // если есть отдельная сущность
+                    .ThenInclude(p => p.Team) 
                 .ToListAsync();
 
             return Ok(subjects);
@@ -47,7 +47,7 @@ namespace Backend.Controllers
             var projects = await _db.Projects
                 .Where(p => p.SubjectId == id)
                 .Include(p => p.Tasks)
-                .Include(p => p.Responsibles)
+                .Include(p => p.Team) 
                 .ToListAsync();
 
             return Ok(projects);

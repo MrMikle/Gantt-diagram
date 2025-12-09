@@ -10,6 +10,6 @@
         public DateTime? Deadline { get; set; }
 
         public List<TaskItem> Tasks { get; set; } = new();
-        public List<Responsible> Responsibles { get; set; } = new();
+        public List<Student> Team { get; set; } = new();
     }
 }

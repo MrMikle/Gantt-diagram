@@ -1,6 +1,7 @@
 using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
+using Backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,10 +23,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:3000") 
               .AllowAnyHeader()
-              .AllowAnyMethod());
+              .AllowAnyMethod()
+              .AllowCredentials());
 });
+
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 var conn = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(opt =>

@@ -42,24 +42,49 @@ namespace Backend.Migrations
                     b.ToTable("Projects");
                 });
 
-            modelBuilder.Entity("Backend.Models.Responsible", b =>
+            modelBuilder.Entity("Backend.Models.Session", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("char(36)");
 
-                    b.Property<string>("Name")
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Token")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("Sessions");
+                });
+
+            modelBuilder.Entity("Backend.Models.Student", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Login")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("Responsibles");
+                    b.ToTable("Students");
                 });
 
             modelBuilder.Entity("Backend.Models.Subject", b =>
@@ -165,6 +190,21 @@ namespace Backend.Migrations
                     b.ToTable("Stages");
                 });
 
+            modelBuilder.Entity("ProjectStudent", b =>
+                {
+                    b.Property<int>("ProjectsId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("ProjectsId", "TeamId");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("ProjectStudent", (string)null);
+                });
+
             modelBuilder.Entity("Backend.Models.Project", b =>
                 {
                     b.HasOne("Backend.Models.Subject", "Subject")
@@ -176,15 +216,15 @@ namespace Backend.Migrations
                     b.Navigation("Subject");
                 });
 
-            modelBuilder.Entity("Backend.Models.Responsible", b =>
+            modelBuilder.Entity("Backend.Models.Session", b =>
                 {
-                    b.HasOne("Backend.Models.Project", "Project")
-                        .WithMany("Responsibles")
-                        .HasForeignKey("ProjectId")
+                    b.HasOne("Backend.Models.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Project");
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("Backend.Models.TaskDependency", b =>
@@ -228,10 +268,23 @@ namespace Backend.Migrations
                     b.Navigation("Task");
                 });
 
+            modelBuilder.Entity("ProjectStudent", b =>
+                {
+                    b.HasOne("Backend.Models.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.Student", null)
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Backend.Models.Project", b =>
                 {
-                    b.Navigation("Responsibles");
-
                     b.Navigation("Tasks");
                 });
 
