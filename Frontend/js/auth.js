@@ -71,6 +71,8 @@ loginForm.onsubmit = async (e) => {
     await loginUserFunc(user, pass);
 };
 
+let currentUserId = null;
+
 registerForm.onsubmit = async (e) => {
     e.preventDefault();
     const user = document.getElementById('regUser').value.trim();
@@ -88,12 +90,31 @@ registerForm.onsubmit = async (e) => {
             alert(err.error || "Ошибка регистрации");
             return;
         }
+        const data = await res.json();
+        currentUserId = data.id;
+        console.log("ID пользователя:", currentUserId);
         await loginUserFunc(user, pass);
     } catch (err) {
         console.error(err);
         alert("Ошибка сети");
     }
 };
+
+const copyIdBtn = document.getElementById('copyIdBtn');
+
+copyIdBtn.addEventListener('click', async () => {
+    if (!currentUserId) {
+        alert("ID пользователя неизвестен");
+        return;
+    }
+    try {
+        await navigator.clipboard.writeText(currentUserId);
+        alert(`ID ${currentUserId} скопирован в буфер обмена`);
+    } catch (err) {
+        console.error('Ошибка копирования ID:', err);
+        alert('Не удалось скопировать ID');
+    }
+});
 
 async function logoutUser() {
     try {
@@ -120,17 +141,29 @@ async function loginUserFunc(user, pass) {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ login: user, password: pass }),
-            credentials: "include"
+            credentials: "include" // важно для cookie
         });
         if (!res.ok) {
             const err = await res.json();
             alert(err.error || "Ошибка входа");
             return;
         }
+
         currentUser = user;
         updateAuthButton();
         authModal.classList.add("hidden");
-        await loadUserData(); 
+
+        // Получаем ID пользователя после логина
+        const idRes = await fetch(`${API_URL}/auth/studentId`, {
+            headers: { "Content-Type": "application/json" },
+            credentials: "include"
+        });
+        if (!idRes.ok) throw new Error("Не удалось получить ID пользователя");
+        const idData = await idRes.json();
+        currentUserId = idData.id;
+        console.log("ID пользователя после логина:", currentUserId);
+
+        await loadUserData();
     } catch (err) {
         console.error(err);
         alert("Ошибка сети");
@@ -477,14 +510,13 @@ async function loadProjectsToState(subjectId) {
     const subj = state.subjects.find(s => s.id === subjectId);
     subj.projects = projects;
 
-    // подгружаем студентов для каждого проекта
     for (const proj of subj.projects) {
         if (!proj.team) proj.team = [];
         if (!proj.responsibles) proj.responsibles = [];
         try {
             const res = await fetch(`${API_BASE}/projects/${proj.id}/team`, { credentials: 'include' });
             if (res.ok) {
-                const team = await res.json(); // [{id, login}]
+                const team = await res.json();
                 proj.team = team;
                 proj.responsibles = team.map(s => ({ id: s.id, name: s.login }));
             }
@@ -1259,7 +1291,7 @@ async function loadProjectTeam(projectId) {
     }
 }
 
-function openTaskEditor(task = null) {
+async function openTaskEditor(task = null) {
     if (currentUser == null) return;
     if (!currentSubjectId || !currentProjectId) return;
     const subj = state.subjects.find(x => x.id === currentSubjectId);
@@ -1283,9 +1315,28 @@ function openTaskEditor(task = null) {
   `;
     modal.content.appendChild(form);
 
+    try {
+        const res = await fetch(`${API_BASE}/projects/${proj.id}/team`, { credentials: 'include' });
+        if (res.ok) {
+            const team = await res.json();
+            proj.team = team;
+            proj.responsibles = team.map(s => ({ id: s.id, name: s.login }));
+        } else {
+            console.warn('Не удалось загрузить команду проекта');
+            proj.responsibles = [];
+        }
+    } catch (err) {
+        console.error('Ошибка при загрузке команды проекта:', err);
+        proj.responsibles = [];
+    }
+
     const respSel = form.querySelector('select[name="responsible"]');
-    (proj.responsibles || []).forEach(r => {
-        const op = document.createElement('option'); op.value = r.name; op.textContent = r.name; respSel.appendChild(op);
+    const responsibles = await loadProjectTeam(proj);
+    responsibles.forEach(r => {
+        const op = document.createElement('option');
+        op.value = r.name;
+        op.textContent = r.name;
+        respSel.appendChild(op);
     });
 
     const dependsSel = form.querySelector('select[name="depends"]');
@@ -1370,13 +1421,11 @@ async function openProject(subjId, projId) {
     renderProjects(subj);
     loadTasks(proj); 
 
-    if (!proj.team || proj.team.length === 0) {
-        await loadProjectTeam(proj.id);
-
+    if (!proj.responsibles || proj.responsibles.length === 0) {
         try {
             const res = await fetch(`${API_BASE}/projects/${proj.id}/team`, { credentials: 'include' });
             if (res.ok) {
-                const team = await res.json(); // [{id, login}]
+                const team = await res.json();
                 proj.team = team;
                 proj.responsibles = team.map(s => ({ id: s.id, name: s.login }));
             }
@@ -1426,7 +1475,6 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const addedStudent = await addResponsibleAPI(proj.id, studentId);
 
-            // обновляем фронтенд
             proj.responsibles = proj.responsibles || [];
             proj.team = proj.team || [];
 
@@ -1439,7 +1487,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             responsibleInput.value = '';
             renderResponsibles(proj);
-            renderTeam(proj); // чтобы сразу обновить отображение команды
+            renderTeam(proj);
             alert(`Студент ${addedStudent.login} добавлен в проект`);
         } catch (err) {
             console.error(err);
@@ -1447,6 +1495,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+async function loadProjectTeam(proj) {
+    try {
+        const res = await fetch(`${API_BASE}/projects/${proj.id}/team`, { credentials: 'include' });
+        if (res.ok) {
+            const team = await res.json();
+            proj.team = team;
+            proj.responsibles = team.map(s => ({ id: s.id, name: s.login }));
+        }
+    } catch (err) {
+        console.error(err);
+        proj.responsibles = [];
+    }
+    return proj.responsibles;
+}
 
 document.getElementById("closeTaskInfoBtn").onclick = () => {
     document.getElementById("taskInfoModal").classList.add("hidden");
