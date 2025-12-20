@@ -102,18 +102,28 @@ registerForm.onsubmit = async (e) => {
 
 const copyIdBtn = document.getElementById('copyIdBtn');
 
-copyIdBtn.addEventListener('click', async () => {
+copyIdBtn.addEventListener('click', () => {
     if (!currentUserId) {
         alert("ID пользователя неизвестен");
         return;
     }
+
+    const input = document.createElement('input');
+    input.value = currentUserId;
+    document.body.appendChild(input);
+    input.select();
     try {
-        await navigator.clipboard.writeText(currentUserId);
-        alert(`ID ${currentUserId} скопирован в буфер обмена`);
+        const success = document.execCommand('copy');
+        if (success) {
+            alert(`ID ${currentUserId} скопирован в буфер обмена`);
+        } else {
+            alert('Не удалось скопировать ID');
+        }
     } catch (err) {
         console.error('Ошибка копирования ID:', err);
         alert('Не удалось скопировать ID');
     }
+    document.body.removeChild(input);
 });
 
 async function logoutUser() {

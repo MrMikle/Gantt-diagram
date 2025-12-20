@@ -47,7 +47,7 @@ namespace Backend.Services
             {
                 StudentId = student.Id,
                 Token = token,
-                ExpiresAt = DateTime.UtcNow.AddMinutes(1)
+                ExpiresAt = DateTime.UtcNow.AddMinutes(60)
             };
 
             _db.Sessions.Add(session);

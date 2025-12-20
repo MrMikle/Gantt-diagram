@@ -29,7 +29,7 @@ namespace Backend.Controllers
             {
                 HttpOnly = true,
                 Path = "/",
-                Expires = DateTime.UtcNow.AddMinutes(1) 
+                Expires = DateTime.UtcNow.AddMinutes(60) 
             });
 
             return Ok();
