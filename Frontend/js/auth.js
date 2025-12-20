@@ -1,6 +1,6 @@
 console.log("1.js loaded");
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "http://158.160.171.150:8080/api";
 
 const authModal = document.getElementById('authModal');
 const closeAuthBtn = document.getElementById('closeAuth');
@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 console.log("api.js loaded");
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "http://158.160.171.150:8080/api";
 
 async function fetchSubjects() {
     if (currentUser == null) return;
