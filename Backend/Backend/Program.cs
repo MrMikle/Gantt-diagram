@@ -23,10 +23,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
-        policy.WithOrigins("http://localhost:3000") 
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials());
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod());
 });
 
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -44,12 +44,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors();
-app.UseHttpsRedirection();
-app.UseAuthorization();
-app.MapControllers();
+app.UseRouting();
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
-app.Urls.Add($"http://0,0.0.0:{port}");
+app.UseCors();
+
+app.UseAuthorization();
+
+app.MapControllers();
 
 app.Run();
