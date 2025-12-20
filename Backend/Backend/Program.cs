@@ -24,9 +24,10 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
         policy
-            .AllowAnyOrigin()
+            .WithOrigins("http://158.160.171.150") 
             .AllowAnyHeader()
-            .AllowAnyMethod());
+            .AllowAnyMethod()
+            .AllowCredentials()); 
 });
 
 builder.Services.AddScoped<IAuthService, AuthService>();
