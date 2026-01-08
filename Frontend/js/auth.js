@@ -769,6 +769,17 @@ function renderTasks(proj) {
                 return;
             }
 
+            if (!t.done && t.depends && t.depends.length) {
+                const notDoneDeps = t.depends
+                    .map(id => proj.tasks.find(x => x.id === id))
+                    .filter(depTask => depTask && !depTask.done);
+
+                if (notDoneDeps.length > 0) {
+                    alert("Невозможно выполнить задачу. Сначала завершите предыдущие");
+                    return;
+                }
+            }
+
             const newDone = !t.done;
 
             try {
