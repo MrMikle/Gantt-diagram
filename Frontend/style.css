@@ -39,6 +39,7 @@ header h1 {
 }
 
 .sidebar {
+    min-width:200px;
     width:280px; border-right:1px solid #e6e6ef; 
     padding:12px; 
     background:linear-gradient(180deg,#fff,#fbfbff);
