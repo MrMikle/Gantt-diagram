@@ -1318,6 +1318,15 @@ async function openTaskEditor(task = null) {
     const subj = state.subjects.find(x => x.id === currentSubjectId);
     const proj = subj.projects.find(x => x.id === currentProjectId);
 
+    if (task) {
+        task.desc = task.desc ?? task.description ?? '';
+
+        task.depends = task.depends ??
+            (task.dependencies
+                ? task.dependencies.map(d => d.dependsOnTaskId)
+                : []);
+    }
+
     const modal = createModal('Task editor');
     const form = document.createElement('form');
     form.innerHTML = `
@@ -1392,13 +1401,12 @@ async function openTaskEditor(task = null) {
         }
 
         const updated = {
-            title: form.title.value.trim() || task?.title || 'Без названия',
+            title: form.title.value.trim() || task.title,
             start: form.start.value || null,
             deadline: form.deadline.value || null,
             responsible: form.responsible.value || null,
-            desc: form.desc.value || '',
-
-            depends: Array.from(form.depends.selectedOptions).map(o => o.value)
+            desc: form.desc.value || task.desc,
+            depends: Array.from(form.depends.selectedOptions).map(o => Number(o.value))
         };
 
         if (!validateTask(proj, updated)) return;
@@ -1412,15 +1420,14 @@ async function openTaskEditor(task = null) {
                     responsible: updated.responsible,
                     description: updated.desc,
 
-                    duration: task.duration,
                     isDone: task.done,
+                    duration: task.duration,
 
                     stages: (task.stages || []).map(s => ({
                         id: s.id,
                         title: s.title,
                         durationDays: Number(s.duration),
-                        isDone: s.done,
-                        updated: new Date().toISOString()
+                        isDone: s.done
                     })),
 
                     dependencies: updated.depends.map(id => ({
