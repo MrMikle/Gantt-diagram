@@ -1368,8 +1368,13 @@ async function openTaskEditor(task = null) {
 
     if (task) {
         form.title.value = task.title;
-        form.start.value = task.start || '';
-        form.deadline.value = task.deadline || '';
+        form.start.value = task.start
+            ? task.start.split('T')[0]
+            : '';
+
+        form.deadline.value = task.deadline
+            ? task.deadline.split('T')[0]
+            : '';
         form.responsible.value = task.responsible || '';
         form.desc.value = task.desc || '';
         (task.depends || []).forEach(d => {
