@@ -1386,38 +1386,51 @@ async function openTaskEditor(task = null) {
             else task._autoStart = true;
         }
 
-        const obj = {
-            title: form.title.value.trim() || 'Без названия',
+        const updated = {
+            title: form.title.value.trim() || task?.title || 'Без названия',
             start: form.start.value || null,
             deadline: form.deadline.value || null,
             responsible: form.responsible.value || null,
             desc: form.desc.value || '',
-            depends: Array.from(form.depends.selectedOptions).map(o => o.value),
-            stages: task ? (task.stages || []) : [],
-            done: task ? !!task.done : false
+
+            depends: Array.from(form.depends.selectedOptions).map(o => o.value)
         };
 
-        if (!validateTask(proj, obj)) return;
+        if (!validateTask(proj, updated)) return;
 
         try {
             if (task) {
                 await updateTaskAPI(task.id, {
-                    title: obj.title,
-                    start: obj.start,
-                    deadline: obj.deadline,
-                    responsible: obj.responsible,
-                    description: obj.desc,
-                    duration: obj.duration,
-                    stages: obj.stages,
-                    isDone: obj.done,
-                    dependencies: obj.depends.map(id => ({ dependsOnTaskId: id }))
+                    title: updated.title,
+                    start: updated.start,
+                    deadline: updated.deadline,
+                    responsible: updated.responsible,
+                    description: updated.desc,
+
+                    duration: task.duration,
+                    isDone: task.done,
+
+                    stages: (task.stages || []).map(s => ({
+                        id: s.id,
+                        title: s.title,
+                        durationDays: Number(s.duration),
+                        isDone: s.done,
+                        updated: new Date().toISOString()
+                    })),
+
+                    dependencies: updated.depends.map(id => ({
+                        dependsOnTaskId: id
+                    }))
                 });
             } else {
-                await addTaskAPI(currentProjectId, obj);
+                await addTaskAPI(currentProjectId, {
+                    ...updated,
+                    stages: [],
+                    done: false
+                });
             }
 
             proj.tasks = await fetchTasks(proj.id);
-
             closeModal(modal.root);
             renderTasks(proj);
             renderGantt(proj);
