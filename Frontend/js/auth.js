@@ -1323,7 +1323,10 @@ async function openTaskEditor(task = null) {
 
         task.depends = task.depends ??
             (task.dependencies
-                ? task.dependencies.map(d => d.dependsOnTaskId)
+                ? task.dependencies.map(d => ({
+                    depId: d.id,
+                    taskId: d.dependsOnTaskId
+                }))
                 : []);
     }
 
@@ -1387,13 +1390,26 @@ async function openTaskEditor(task = null) {
         form.responsible.value = task.responsible || '';
         form.desc.value = task.desc || '';
         (task.depends || []).forEach(d => {
-            const opt = Array.from(dependsSel.options).find(o => o.value === d);
+            const opt = Array.from(dependsSel.options)
+                .find(o => Number(o.value) === d.taskId);
             if (opt) opt.selected = true;
         });
     }
 
     form.onsubmit = async e => {
         e.preventDefault();
+
+        const selectedIds = Array.from(form.depends.selectedOptions)
+            .map(o => Number(o.value));
+
+        const dependenciesPayload = selectedIds.map(id => {
+            const existing = (task?.depends || [])
+                .find(d => d.taskId === id);
+
+            return existing
+                ? { id: existing.depId, dependsOnTaskId: id } 
+                : { dependsOnTaskId: id };              
+        });
 
         if (task) {
             if (form.start.value) delete task._autoStart;
@@ -1406,7 +1422,6 @@ async function openTaskEditor(task = null) {
             deadline: form.deadline.value || null,
             responsible: form.responsible.value || null,
             desc: form.desc.value || task.desc,
-            depends: Array.from(form.depends.selectedOptions).map(o => Number(o.value))
         };
 
         if (!validateTask(proj, updated)) return;
@@ -1430,15 +1445,14 @@ async function openTaskEditor(task = null) {
                         isDone: s.done
                     })),
 
-                    dependencies: updated.depends.map(id => ({
-                        dependsOnTaskId: id
-                    }))
+                    dependencies: dependenciesPayload
                 });
             } else {
                 await addTaskAPI(currentProjectId, {
                     ...updated,
                     stages: [],
-                    done: false
+                    done: false,
+                    dependencies: dependenciesPayload
                 });
             }
 
