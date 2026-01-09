@@ -1321,13 +1321,13 @@ async function openTaskEditor(task = null) {
     if (task) {
         task.desc = task.desc ?? task.description ?? '';
 
-        task.depends = task.depends ??
-            (task.dependencies
+        task.depends =
+            task.dependencies
                 ? task.dependencies.map(d => ({
                     depId: d.id,
                     taskId: d.dependsOnTaskId
                 }))
-                : []);
+                : [];
     }
 
     const modal = createModal('Task editor');
