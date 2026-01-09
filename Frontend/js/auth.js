@@ -1394,12 +1394,14 @@ async function openTaskEditor(task = null) {
                 .find(o => Number(o.value) === d.taskId);
             if (opt) opt.selected = true;
         });
+
+        dependsSel.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
     form.onsubmit = async e => {
         e.preventDefault();
 
-        const selectedIds = Array.from(form.depends.selectedOptions)
+        const selectedIds = Array.from(dependsSel.selectedOptions)
             .map(o => Number(o.value));
 
         const dependenciesPayload = selectedIds.map(id => {
