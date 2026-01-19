@@ -621,7 +621,7 @@ function renderSubjects() {
         infoDiv.style.flex = '1';
         infoDiv.style.overflow = 'hidden';
         infoDiv.style.textOverflow = 'ellipsis';
-        infoDiv.style.whiteSpace = 'nowrap';
+        infoDiv.style.whiteSpace = 'wrap';
         infoDiv.style.minWidth = '0';
         infoDiv.style.position = 'relative';
 

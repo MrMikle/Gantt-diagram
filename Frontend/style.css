@@ -39,8 +39,7 @@ header h1 {
 }
 
 .sidebar {
-    min-width:200px;
-    width:280px; border-right:1px solid #e6e6ef; 
+    border-right:1px solid #e6e6ef; 
     padding:12px; 
     background:linear-gradient(180deg,#fff,#fbfbff);
     overflow: hidden;
@@ -78,7 +77,8 @@ header h1 {
     display:flex; 
     flex-direction:column; 
     gap:8px; 
-    margin-top:8px
+    margin-top:8px;
+    box-sizing: border-box;
 }
 
 .item {
@@ -207,9 +207,6 @@ label {
 }
 
 .legend {
-    position: absolute;
-    top: 8px;    
-    right: 12px; 
     display: flex;
     gap: 8px;
     align-items: center;
@@ -270,10 +267,18 @@ label {
 
 .left-panel {
     width: 360px;
-    min-width: 280px;
+    min-width: 310px;
     display: flex;
     flex-direction: column;
     height: 100%;
+    overflow: scroll;
+
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.left-panel::-webkit-scrollbar {
+  display: none;
 }
 
 #tasksList {
@@ -286,10 +291,11 @@ label {
 }
 
 .svg-wrap {
-    display: flex;
+    display: grid;
+    grid-template-rows: 1fr 10fr;
     flex-direction: column;
     position: relative;
-    width: 66vw;
+    width: 100%;
     height: 100%;
     padding: 12px;
     border-radius: 10px;
@@ -298,7 +304,7 @@ label {
 
 .svg-container {
     flex: 1;
-    overflow: auto;
+    overflow: scroll; 
 }
 
 #ganttSvg {
