@@ -1266,12 +1266,21 @@ function openTaskInfoModal(proj, taskId) {
         <div class="muted small">Длительность: ${task.duration || "?"} д.</div>
         <div class="muted small">Ответственный: ${task.responsible || "—"}</div>
 
-        <div style="margin-top:8px">
+        <div style="margin-top:8px; max-width:100%">
             <strong>Описание:</strong>
-            <div class="muted small" style="white-space:pre-wrap; margin-top:4px">
+            <div
+                class="muted small"
+                style="
+                    margin-top:4px;
+                    max-width:100%;
+                    white-space:pre-wrap;
+                    word-wrap:break-word;
+                    overflow-wrap:anywhere;
+                "
+            >
                 ${task.desc || "—"}
             </div>
-        </div>  
+        </div>
         
         <hr style="margin: 10px 0;">
         <strong>Этапы:</strong>
