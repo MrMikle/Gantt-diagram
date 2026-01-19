@@ -151,7 +151,7 @@ async function loginUserFunc(user, pass) {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ login: user, password: pass }),
-            credentials: "include" // важно для cookie
+            credentials: "include"
         });
         if (!res.ok) {
             const err = await res.json();
@@ -163,7 +163,6 @@ async function loginUserFunc(user, pass) {
         updateAuthButton();
         authModal.classList.add("hidden");
 
-        // Получаем ID пользователя после логина
         const idRes = await fetch(`${API_URL}/auth/studentId`, {
             headers: { "Content-Type": "application/json" },
             credentials: "include"
@@ -1253,6 +1252,8 @@ function openTaskInfoModal(proj, taskId) {
     const task = proj.tasks.find(t => t.id === taskId);
     if (!task) return;
 
+    task.desc = task.desc ?? task.description ?? "";
+
     const modal = document.getElementById("taskInfoModal");
     const title = document.getElementById("taskInfoTitle");
     const body = document.getElementById("taskInfoBody");
@@ -1264,6 +1265,14 @@ function openTaskInfoModal(proj, taskId) {
         <div class="muted small">Начало: ${task.start || "—"}</div>
         <div class="muted small">Длительность: ${task.duration || "?"} д.</div>
         <div class="muted small">Ответственный: ${task.responsible || "—"}</div>
+
+        <div style="margin-top:8px">
+            <strong>Описание:</strong>
+            <div class="muted small" style="white-space:pre-wrap; margin-top:4px">
+                ${task.desc || "—"}
+            </div>
+        </div>  
+        
         <hr style="margin: 10px 0;">
         <strong>Этапы:</strong>
     `;
